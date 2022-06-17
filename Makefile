@@ -18,6 +18,7 @@
 include ../../checks.mk
 
 # Give this service a name, version number, and pattern name
+DOCKER_HUB_ID ?+ ibmosquito
 SERVICE_NAME:="monitor"
 SERVICE_VERSION:="1.1.0"
 PATTERN_NAME:="pattern-monitor"
@@ -30,7 +31,7 @@ ARCH:=$(shell ../../helper -a)
 CONTAINER_CREDS:=
 
 build: check-dockerhubid
-	docker build -t $(DOCKERHUB_ID)/$(SERVICE_NAME)_$(ARCH):$(SERVICE_VERSION) -f ./Dockerfile.$(ARCH) .
+	docker build -t $(DOCKER_HUB_ID)/$(SERVICE_NAME)_$(ARCH):$(SERVICE_VERSION) -f ./Dockerfile.$(ARCH) .
 
 run: check-dockerhubid
 	-docker network create mqtt-net 2>/dev/null || :
@@ -39,7 +40,7 @@ run: check-dockerhubid
            -p 0.0.0.0:5200:5200 \
            --name ${SERVICE_NAME} \
            --network mqtt-net --network-alias ${SERVICE_NAME} \
-           $(DOCKERHUB_ID)/$(SERVICE_NAME)_$(ARCH):$(SERVICE_VERSION)
+           $(DOCKER_HUB_ID)/$(SERVICE_NAME)_$(ARCH):$(SERVICE_VERSION)
 
 dev: build check-dockerhubid
 	-docker network create mqtt-net 2>/dev/null || :
@@ -48,20 +49,20 @@ dev: build check-dockerhubid
            -p 0.0.0.0:5200:5200 \
            --name ${SERVICE_NAME} \
            --network mqtt-net --network-alias ${SERVICE_NAME} \
-           $(DOCKERHUB_ID)/$(SERVICE_NAME)_$(ARCH):$(SERVICE_VERSION) /bin/sh
+           $(DOCKER_HUB_ID)/$(SERVICE_NAME)_$(ARCH):$(SERVICE_VERSION) /bin/sh
 
 stop: check-dockerhubid
 	@docker rm -f ${SERVICE_NAME} 2>/dev/null || :
 
 clean: check-dockerhubid
 	@docker rm -f ${SERVICE_NAME} 2>/dev/null || :
-	@docker rmi $(DOCKERHUB_ID)/$(SERVICE_NAME)_$(ARCH):$(SERVICE_VERSION) 2>/dev/null || :
+	@docker rmi $(DOCKER_HUB_ID)/$(SERVICE_NAME)_$(ARCH):$(SERVICE_VERSION) 2>/dev/null || :
 
 publish-service:
 	@ARCH=$(ARCH) \
 	    SERVICE_NAME="$(SERVICE_NAME)" \
 	    SERVICE_VERSION="$(SERVICE_VERSION)"\
-	    SERVICE_CONTAINER="$(DOCKERHUB_ID)/$(SERVICE_NAME)_$(ARCH):$(SERVICE_VERSION)" \
+	    SERVICE_CONTAINER="$(DOCKER_HUB_ID)/$(SERVICE_NAME)_$(ARCH):$(SERVICE_VERSION)" \
 	    hzn exchange service publish -O $(CONTAINER_CREDS) -P -f service.json --public=true
 
 publish-pattern:
