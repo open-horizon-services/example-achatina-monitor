@@ -18,7 +18,7 @@
 include ../../checks.mk
 
 # Give this service a name, version number, and pattern name
-DOCKER_HUB_ID ?+ ibmosquito
+DOCKER_HUB_ID ?= ibmosquito
 SERVICE_NAME:="monitor"
 SERVICE_VERSION:="1.1.0"
 PATTERN_NAME:="pattern-monitor"
